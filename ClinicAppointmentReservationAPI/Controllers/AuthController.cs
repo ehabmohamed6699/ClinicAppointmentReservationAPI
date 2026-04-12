@@ -1,4 +1,5 @@
-﻿using ClinicAppointmentReservation.Domain.Models;
+﻿using ClinicAppointmentReservation.Domain.Interfaces;
+using ClinicAppointmentReservation.Domain.Models;
 using ClinicAppointmentReservation.Domain.Models.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -16,17 +17,19 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-
-        public AuthController(UserManager<User> userManager, IConfiguration configuration)
+        private readonly IUnitOfWork _unitOfWork;
+        public AuthController(UserManager<User> userManager, IConfiguration configuration, IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(FormUserRegister model)
         {
-            if (ModelState.IsValid) { 
+            if (ModelState.IsValid)
+            {
                 var user = new User
                 {
                     UserName = model.Email,
@@ -38,7 +41,24 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
                 {
                     // Assign the "patient" role to the user if needed
                     await _userManager.AddToRoleAsync(user, "patient");
-                    return Ok("User created successfully");
+                    var patient = new Patient
+                    {
+                        Name = model.Name,
+                        DateOfBirth = model.DateOfBirth,
+                        Gender = model.Gender,
+                        UserId = user.Id
+                    };
+                    _unitOfWork.Patients.Add(patient);
+                    await _unitOfWork.SaveChangesAsync();
+                    return Ok(new
+                    {
+                        Id = user.Id,
+                        Name = patient.Name,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        DateOfBirth = patient.DateOfBirth,
+                        Gender = patient.Gender
+                    });
                 }
                 else
                 {
@@ -58,12 +78,12 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user != null)
                 {
-                    if(await _userManager.CheckPasswordAsync(user, model.Password))
+                    if (await _userManager.CheckPasswordAsync(user, model.Password))
                     {
                         var claims = new List<Claim>();
                         claims.Add(new Claim(ClaimTypes.Name, user.UserName));
                         claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id));
-                        
+
                         claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
                         var roles = await _userManager.GetRolesAsync(user);
                         foreach (var role in roles)
@@ -98,6 +118,11 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
                 }
             }
             return BadRequest(ModelState);
+        }
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            throw new NotImplementedException();
         }
     }
 }

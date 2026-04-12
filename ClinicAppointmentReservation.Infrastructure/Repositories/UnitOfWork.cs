@@ -11,10 +11,14 @@ namespace ClinicAppointmentReservation.Infrastructure.Repositories
         private readonly AppDbContext _context;
         public IClinicRepository Clinics { get; private set; }
         public ISpecializationRepository Specializations { get; private set; }
+        public IPatientRepository Patients { get; private set; }
+        public IDoctorRepository Doctors { get; private set; }
         public UnitOfWork(AppDbContext context) {
             _context = context;
             this.Clinics = new ClinicRepository(_context);
             this.Specializations = new SpecializationRepository(_context);
+            this.Patients = new PatientRepository(_context);
+            this.Doctors = new DoctorRepository(_context);
         }
         public void Dispose()
         {
