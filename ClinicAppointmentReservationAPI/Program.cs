@@ -1,4 +1,9 @@
+using ClinicAppointmentReservation.Domain.Interfaces;
+using ClinicAppointmentReservation.Domain.Models;
 using ClinicAppointmentReservation.Infrastructure.Data;
+using ClinicAppointmentReservation.Infrastructure.Repositories;
+using ClinicAppointmentReservation.WebAPI.Extentions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +14,11 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(op => op.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// Add JWT authentication
+builder.Services.AddCustomJwtAuth(builder.Configuration);
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -18,8 +28,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
