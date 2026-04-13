@@ -10,6 +10,7 @@ namespace ClinicAppointmentReservation.Domain.Interfaces
     {
         Task<(IEnumerable<Doctor> doctors , int TotalCount)> GetAllAsync(DoctorSearchParameters parameters);
         Task<Doctor?> GetByIdAsync(int id);
+        Task<Doctor?> GetByUserIdAsync(string userId);
         void Add(Doctor entity);
         void Update(Doctor entity);
         void Delete(Doctor entity);

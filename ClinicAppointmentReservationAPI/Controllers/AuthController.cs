@@ -1,6 +1,8 @@
 ﻿using ClinicAppointmentReservation.Domain.Interfaces;
 using ClinicAppointmentReservation.Domain.Models;
 using ClinicAppointmentReservation.Domain.Models.DTO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +34,9 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
             {
                 var user = new User
                 {
+                    Name = model.Name,
+                    DateOfBirth = model.DateOfBirth,
+                    Gender = model.Gender,
                     UserName = model.Email,
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
@@ -43,9 +48,6 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
                     await _userManager.AddToRoleAsync(user, "patient");
                     var patient = new Patient
                     {
-                        Name = model.Name,
-                        DateOfBirth = model.DateOfBirth,
-                        Gender = model.Gender,
                         UserId = user.Id
                     };
                     _unitOfWork.Patients.Add(patient);
@@ -53,11 +55,11 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
                     return Ok(new
                     {
                         Id = user.Id,
-                        Name = patient.Name,
+                        Name = user.Name,
                         Email = user.Email,
                         PhoneNumber = user.PhoneNumber,
-                        DateOfBirth = patient.DateOfBirth,
-                        Gender = patient.Gender
+                        DateOfBirth = user.DateOfBirth,
+                        Gender = user.Gender
                     });
                 }
                 else
@@ -124,5 +126,6 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
         {
             throw new NotImplementedException();
         }
+        
     }
 }

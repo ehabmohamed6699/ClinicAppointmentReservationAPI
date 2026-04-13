@@ -7,6 +7,7 @@ namespace ClinicAppointmentReservation.Domain.Enums
     public enum Sex
     {
         Male,
-        Female
+        Female,
+        Other
     }
 }

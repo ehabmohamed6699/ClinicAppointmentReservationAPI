@@ -15,7 +15,7 @@ namespace ClinicAppointmentReservation.Domain.Models.DTO
         [Required]
         public DateOnly DateOfBirth { get; set; }
         [Required]
-        [Range((int)Sex.Male, (int)Sex.Female)]
+        [Range((int)Sex.Male, (int)Sex.Other)]
         public Sex Gender { get; set; }
         [Required]
         public string Password { get; set; }

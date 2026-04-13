@@ -31,7 +31,7 @@ namespace ClinicAppointmentReservation.Infrastructure.Repositories
             var query = _context.Doctors.AsNoTracking().AsQueryable();
             if (!string.IsNullOrWhiteSpace(parameters.Search))
             {
-                query = query.Where(d => d.Name.Contains(parameters.Search));
+                query = query.Where(d => d.User.Name.Contains(parameters.Search));
             }
             if(parameters.SpecializationId.HasValue)
             {
@@ -58,7 +58,7 @@ namespace ClinicAppointmentReservation.Infrastructure.Repositories
                                         .AsQueryable();
             if (!string.IsNullOrWhiteSpace(parameters.Search))
             {
-                query = query.Where(d => d.Name.Contains(parameters.Search));
+                query = query.Where(d => d.User.Name.Contains(parameters.Search));
             }
             if(parameters.SpecializationId.HasValue)
             {
@@ -81,12 +81,19 @@ namespace ClinicAppointmentReservation.Infrastructure.Repositories
             return await _context.Doctors.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
         }
 
+        public Task<Doctor?> GetByUserIdAsync(string userId)
+        {
+            var doctor = _context.Doctors.AsNoTracking().FirstOrDefaultAsync(d => d.UserId == userId);
+            return doctor;
+        }
+
         public async Task<Doctor?> GetDetailsAsync(int id)
         {
             return await _context.Doctors.AsNoTracking().Include(x => x.Specialization)
-                                              .Include(d => d.DoctorClinics)
-                                              .ThenInclude(dc => dc.Clinic)
-                                              .FirstOrDefaultAsync(d => d.Id == id);
+                                            .Include(d => d.User)
+                                            .Include(d => d.DoctorClinics)
+                                            .ThenInclude(dc => dc.Clinic)
+                                            .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public void Update(Doctor entity)

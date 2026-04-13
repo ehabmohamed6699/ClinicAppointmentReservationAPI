@@ -12,14 +12,6 @@ namespace ClinicAppointmentReservation.Domain.Models
         [Key]
         public int Id { get; set; }
 
-        [MaxLength(100)]
-        public string Name { get; set; }
-        public DateOnly DateOfBirth { get; set; }
-        [NotMapped]
-        public int Age  => DateOnly.FromDateTime(DateTime.Now).Year - DateOfBirth.Year - (DateOnly.FromDateTime(DateTime.Now).DayOfYear < DateOfBirth.DayOfYear ? 1 : 0);
-
-        public Sex Gender { get; set; }
-
         [ForeignKey("User")]
 
         public string UserId { get; set; }

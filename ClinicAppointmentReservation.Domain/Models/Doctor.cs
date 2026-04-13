@@ -12,6 +12,7 @@ namespace ClinicAppointmentReservation.Domain.Models
         [MaxLength(500)]
         public string Bio { get; set; }
         public byte[]? Image { get; set; }
+        public bool IsApproved { get; set; } = false;
 
         [ForeignKey("Specialization")]
         [DisplayName("Specialization")]
