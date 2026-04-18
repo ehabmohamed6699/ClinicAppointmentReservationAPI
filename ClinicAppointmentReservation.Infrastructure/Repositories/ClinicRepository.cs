@@ -21,6 +21,15 @@ namespace ClinicAppointmentReservation.Infrastructure.Repositories
             _context.Clinics.Add(entity);
         }
 
+        public void AssignDoctorToClinic(int doctorId, int clinicId)
+        {
+            var existingAssignment = _context.DoctorClinics.FirstOrDefault(dc => dc.DoctorId == doctorId && dc.ClinicId == clinicId);
+            if (existingAssignment != null) { 
+                throw new InvalidOperationException("Doctor is already assigned to the clinic.");
+            }
+            _context.DoctorClinics.Add(new DoctorClinic { DoctorId = doctorId, ClinicId = clinicId });
+        }
+
         public void Delete(Clinic entity)
         {
             _context.Clinics.Remove(entity);
@@ -45,6 +54,19 @@ namespace ClinicAppointmentReservation.Infrastructure.Repositories
         public async Task<Clinic?> GetByIdAsync(int id)
         {
             return await _context.Clinics.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public void UnassignDoctorFromClinic(int doctorId, int clinicId)
+        {
+            var doctorClinic = _context.DoctorClinics.FirstOrDefault(dc => dc.DoctorId == doctorId && dc.ClinicId == clinicId);
+            if (doctorClinic != null)
+            {
+                _context.DoctorClinics.Remove(doctorClinic);
+            }
+            else
+            {
+                throw new InvalidOperationException("Doctor is not assigned to the clinic.");
+            }
         }
 
         public void Update(Clinic entity)

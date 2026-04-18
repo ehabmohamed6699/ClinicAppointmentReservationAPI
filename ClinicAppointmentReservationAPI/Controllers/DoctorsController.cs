@@ -83,11 +83,74 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
             {
                 return NotFound();
             }
+            if(doctor.IsRejected)
+            {
+                return BadRequest("You cannot approve an already rejected doctor.");
+            }
             doctor.IsApproved = true;
+            doctor.ApprovalDate = DateTime.Now;
             await _userManager.AddToRoleAsync(user, "doctor");
             _unitOfWork.Doctors.Update(doctor);
             await _unitOfWork.SaveChangesAsync();
             return Ok();
+        }
+        [HttpPatch("reject-doctor/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+        public async Task<IActionResult> RejectDoctor(int id)
+        {
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+            var user = await _userManager.FindByIdAsync(doctor.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            if(doctor.IsApproved)
+            {
+                return BadRequest("You cannot reject an already approved doctor.");
+            }
+            doctor.IsRejected = true;
+            _unitOfWork.Doctors.Update(doctor);
+            await _unitOfWork.SaveChangesAsync();
+            return Ok();
+        }
+        [HttpDelete("delete-doctor/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+        public async Task<IActionResult> DeleteDoctor(int id)
+        {
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(id);
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+            var user = await _userManager.FindByIdAsync(doctor.UserId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            
+            _unitOfWork.Doctors.Delete(doctor);
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains("doctor"))
+            {
+                await _userManager.RemoveFromRoleAsync(user, "doctor");
+            }
+            await _unitOfWork.SaveChangesAsync();
+            return Ok();
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+        [HttpGet("pending-doctors")]
+        public async Task<IActionResult> GetPendingDoctors([FromQuery] DoctorSearchParameters parameters)
+        {
+            var doctors = await _unitOfWork.Doctors.GetPendingDoctors(parameters);
+            return Ok(new
+            {
+                Doctors = doctors.doctors,
+                TotalCount = doctors.TotalCount
+            });
         }
     }
 }

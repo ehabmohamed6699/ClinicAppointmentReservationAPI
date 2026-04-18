@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using System.Text;
 
 namespace ClinicAppointmentReservation.Infrastructure.Data
@@ -18,6 +19,7 @@ namespace ClinicAppointmentReservation.Infrastructure.Data
         public DbSet<Specialization> Specializations { get; set; }
         public DbSet<DoctorClinic> DoctorClinics { get; set; }
         public DbSet<Patient> Patients { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -29,6 +31,17 @@ namespace ClinicAppointmentReservation.Infrastructure.Data
                 new Specialization { Id = 4, Name = "Pediatrics" },
                 new Specialization { Id = 5, Name = "Orthopedics" }
             );
+            builder.Entity<Appointment>()
+            .HasOne(a => a.Patient)
+            .WithMany(p => p.Appointments)
+            .HasForeignKey(a => a.PatientId)
+            .OnDelete(DeleteBehavior.Restrict); // <--- Change this to Restrict
+
+                builder.Entity<Appointment>()
+                    .HasOne(a => a.Doctor)
+                    .WithMany(d => d.Appointments)
+                    .HasForeignKey(a => a.DoctorId)
+                    .OnDelete(DeleteBehavior.Restrict); // <--- Change this to Restrict
         }
     }
 }

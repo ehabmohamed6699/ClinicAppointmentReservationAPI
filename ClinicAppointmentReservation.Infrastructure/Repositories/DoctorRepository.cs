@@ -28,7 +28,7 @@ namespace ClinicAppointmentReservation.Infrastructure.Repositories
 
         public async Task<(IEnumerable<Doctor> doctors, int TotalCount)> GetAllAsync(DoctorSearchParameters parameters)
         {
-            var query = _context.Doctors.AsNoTracking().AsQueryable();
+            var query = _context.Doctors.AsNoTracking().AsQueryable().Where(d => d.IsApproved == true);
             if (!string.IsNullOrWhiteSpace(parameters.Search))
             {
                 query = query.Where(d => d.User.Name.Contains(parameters.Search));
@@ -94,6 +94,27 @@ namespace ClinicAppointmentReservation.Infrastructure.Repositories
                                             .Include(d => d.DoctorClinics)
                                             .ThenInclude(dc => dc.Clinic)
                                             .FirstOrDefaultAsync(d => d.Id == id);
+        }
+
+        public async Task<(IEnumerable<Doctor> doctors, int TotalCount)> GetPendingDoctors(DoctorSearchParameters parameters)
+        {
+            var query = _context.Doctors.AsNoTracking().Where(d => !d.IsApproved && !d.IsRejected);
+            if (!string.IsNullOrWhiteSpace(parameters.Search))
+            {
+                query = query.Where(d => d.User.Name.Contains(parameters.Search));
+            }
+            if (parameters.SpecializationId.HasValue)
+            {
+                query = query.Where(d => d.SpecializationId == parameters.SpecializationId.Value);
+            }
+            int page = Math.Max(parameters.Page, 1);
+            var totalCount = await query.CountAsync();
+            var doctors = await query
+                                     .Include(d => d.User)
+                                     .Skip((page - 1) * parameters.PageSize)
+                                     .Take(parameters.PageSize)
+                                     .ToListAsync();
+            return (doctors, totalCount);
         }
 
         public void Update(Doctor entity)

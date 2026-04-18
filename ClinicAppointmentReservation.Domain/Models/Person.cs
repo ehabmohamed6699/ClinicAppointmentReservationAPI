@@ -12,6 +12,8 @@ namespace ClinicAppointmentReservation.Domain.Models
         [Key]
         public int Id { get; set; }
 
+        public virtual IEnumerable<Appointment> Appointments { get; set; }
+
         [ForeignKey("User")]
 
         public string UserId { get; set; }

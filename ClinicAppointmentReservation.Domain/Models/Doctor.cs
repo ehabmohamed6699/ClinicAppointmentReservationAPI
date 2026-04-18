@@ -14,6 +14,9 @@ namespace ClinicAppointmentReservation.Domain.Models
         public byte[]? Image { get; set; }
         public bool IsApproved { get; set; } = false;
 
+        public DateTime? ApprovalDate { get; set; } = null;
+        public bool IsRejected { get; set; } = false;
+
         [ForeignKey("Specialization")]
         [DisplayName("Specialization")]
         public int SpecializationId { get; set; }

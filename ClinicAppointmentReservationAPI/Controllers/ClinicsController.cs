@@ -87,5 +87,55 @@ namespace ClinicAppointmentReservation.WebAPI.Controllers
             await _unitOfWork.SaveChangesAsync();
             return NoContent();
         }
+        [HttpPost("{clinicId}/assign-doctor/{doctorId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+        public async Task<IActionResult> AssignDoctorToClinic(int clinicId, int doctorId)
+        {
+            var clinic = await _unitOfWork.Clinics.GetByIdAsync(clinicId);
+            if (clinic == null)
+            {
+                return NotFound("Clinic not found.");
+            }
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(doctorId);
+            if (doctor == null)
+            {
+                return NotFound("Doctor not found.");
+            }
+            try
+            {
+                _unitOfWork.Clinics.AssignDoctorToClinic(doctorId, clinicId);
+                await _unitOfWork.SaveChangesAsync();
+                return Ok("Doctor assigned to clinic successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("{clinicId}/unassign-doctor/{doctorId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+        public async Task<IActionResult> UnassignDoctorFromClinic(int clinicId, int doctorId)
+        {
+            var clinic = await _unitOfWork.Clinics.GetByIdAsync(clinicId);
+            if (clinic == null)
+            {
+                return NotFound("Clinic not found.");
+            }
+            var doctor = await _unitOfWork.Doctors.GetByIdAsync(doctorId);
+            if (doctor == null)
+            {
+                return NotFound("Doctor not found.");
+            }
+            try
+            {
+                _unitOfWork.Clinics.UnassignDoctorFromClinic(doctorId, clinicId);
+                await _unitOfWork.SaveChangesAsync();
+                return Ok("Doctor unassigned from clinic successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

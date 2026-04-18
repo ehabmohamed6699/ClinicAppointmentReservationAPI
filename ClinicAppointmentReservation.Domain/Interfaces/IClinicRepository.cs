@@ -13,6 +13,7 @@ namespace ClinicAppointmentReservation.Domain.Interfaces
         void Add(Clinic entity);
         void Update(Clinic entity);
         void Delete(Clinic entity);
-
+        void AssignDoctorToClinic(int doctorId, int clinicId);
+        void UnassignDoctorFromClinic(int doctorId, int clinicId);
     }
 }

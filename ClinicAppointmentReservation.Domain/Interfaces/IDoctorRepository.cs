@@ -17,5 +17,7 @@ namespace ClinicAppointmentReservation.Domain.Interfaces
 
         Task<Doctor?> GetDetailsAsync(int id);
         Task<(IEnumerable<Doctor> doctors, int TotalCount)> GetByClinicIdAsync(int clinicId, DoctorSearchParameters parameters);
+        Task<(IEnumerable<Doctor> doctors, int TotalCount)> GetPendingDoctors(DoctorSearchParameters parameters);
+
     }
 }

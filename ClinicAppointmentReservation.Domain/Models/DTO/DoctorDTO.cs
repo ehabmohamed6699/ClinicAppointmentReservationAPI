@@ -9,6 +9,8 @@ namespace ClinicAppointmentReservation.Domain.Models.DTO
         public string Bio { get; set; }
         public byte[]? Image { get; set; }
         public bool IsApproved { get; set; }
+        public DateTime? ApprovalDate { get; set; }
+        public bool IsRejected { get; set; }
         public int SpecializationId { get; set; }
         public string SpecializationName { get; set; }
         public List<DoctorClinicDTO> Clinics { get; set; } = new();
